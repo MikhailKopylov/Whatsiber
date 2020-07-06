@@ -1,0 +1,58 @@
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import java.net.URL?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.CheckBox?>
+<BorderPane fx:controller="client.Controller"
+            xmlns:fx="http://javafx.com/fxml">
+
+    <stylesheets>
+        <URL value="@/css/style.css"/>
+    </stylesheets>
+    <top>
+        <MenuBar>
+            <Menu text="Файл">
+                <MenuItem text="Выйти" onAction="#logout"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <VBox>
+
+            <HBox fx:id="authPanel">
+                <TextField fx:id="loginTextField" promptText="Логин"
+                           HBox.hgrow="ALWAYS"/>
+                <PasswordField fx:id="passTextField" promptText="Пароль"
+                               HBox.hgrow="ALWAYS" onAction="#Enter"/>
+                <Button text="Войти" onAction="#Enter"/>
+            </HBox>
+
+            <TextArea fx:id="chatTextArea" editable="false" focusTraversable="false" VBox.vgrow="ALWAYS"/>
+
+            <HBox fx:id="newMessagePanel" visible="false" managed="false">
+                <TextField fx:id="newMsgTextField" promptText="Введите сообщение"
+                           HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
+                <Button fx:id="sendNewMsg" text="Отправить" onAction="#sendMessage"/>
+            </HBox>
+            <CheckBox fx:id="privateCheckBox" text="Личное сообщение" onAction="#selected"
+                      visible="false" managed="false"/>
+
+            <HBox fx:id="privateMessagePanel" visible="false" managed="false">
+                <TextField fx:id="nickRecipientTextField" promptText="Введите имя получателя сообщения"
+                           HBox.hgrow="ALWAYS" onAction="#sendPrivateMessage"/>
+                <Button fx:id="sendPrivateMsg" text="Отправить" onAction="#sendPrivateMessage"/>
+            </HBox>
+
+        </VBox>
+    </center>
+
+
+</BorderPane>

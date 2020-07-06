@@ -1,0 +1,18 @@
+.HBox{
+-fx-background-color: #effffd;
+    -fx-padding: 30;
+
+}
+
+.VBox{
+ -fx-padding: 30;
+}
+.TextArea {
+    -fx-background-color: lightgray;
+    -fx-padding: 30;
+}
+
+#resultTextField {
+    -fx-font-size: 60px;
+
+}
