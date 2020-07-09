@@ -1,7 +1,6 @@
 package client;
 
 import intefaces.Client;
-import server.Commands;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -65,27 +64,34 @@ public class ClientImpl implements Client {
             try {
                 while (true) {
                     String commandMsg = in.readUTF();
+
                     if (commandMsg.startsWith(AUTH_OK.toString())) {
-                        nick = commandMsg.split("\\s")[1];
-                        controller.addNewMessage(String.format("%s в сети", nick));
+//                        nick = commandMsg.split("\\s")[1];
+//                        controller.addNewMessage(String.format("%s в сети", nick));
                         controller.setAuthorized(true);
                         break;
-                    } else if(commandMsg.startsWith(AUTH_WRONG.toString())){
+                    } else if (commandMsg.startsWith(AUTH_WRONG.toString())) {
                         controller.addNewMessage("Неверное имя пользователя или пароль");
-                    } else if (commandMsg.startsWith(ONLINE_WRONG.toString())){
+                    } else if (commandMsg.startsWith(ONLINE_WRONG.toString())) {
                         String nickOnlineWrong = commandMsg.split("\\s")[1];
-                        controller.addNewMessage(String.format("%s уже в сети", nickOnlineWrong ));
+                        controller.addNewMessage(String.format("%s уже в сети", nickOnlineWrong));
                     }
 
                 }
                 while (true) {
                     String incomingMsg = in.readUTF();
 
-                    if (incomingMsg.startsWith(AUTH_OK.toString())) {
-                        String newUserNick = incomingMsg.split("\\s")[1];
-                        controller.addNewMessage(String.format("%s в сети", newUserNick));
-                    } else if (incomingMsg.startsWith(EXIT.toString())){
-                        break;
+                    if (incomingMsg.startsWith("/")) {
+                        if (incomingMsg.startsWith(USER_ONLINE.toString())) {
+                            String newUserNick = incomingMsg.split("\\s")[1];
+                            controller.addNewMessage(String.format("%s в сети", newUserNick));
+                        } else if (incomingMsg.startsWith(EXIT.toString())) {
+                            break;
+                        } else if (incomingMsg.startsWith(USER_LIST.toString())) {
+                            String[] token = incomingMsg.split("\\s+", 2);
+                            String[] users = token[1].split("\\s+");
+                            controller.updateUserList(users);
+                        }
                     } else {
                         controller.addNewMessage(incomingMsg);
                     }
@@ -105,7 +111,7 @@ public class ClientImpl implements Client {
 
     @Override
     public String getNick() {
-        if(nick != null) {
+        if (nick != null) {
             return nick;
         } else {
             return "";

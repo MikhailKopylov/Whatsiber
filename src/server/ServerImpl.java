@@ -72,12 +72,30 @@ public class ServerImpl implements Server {
     @Override
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
+        broadcastUserList();
     }
 
     @Override
     public void unsubscribe(ClientHandler clientHandler) {
-        clients.remove(clientHandler);
-        System.out.println(String.format("%s отключился", clientHandler.getUser().getNick()));
+        if (clients.contains(clientHandler)) {
+            clients.remove(clientHandler);
+            broadcastUserList();
+            System.out.println(String.format("%s отключился", clientHandler.getUser().getNick()));
+        }
     }
 
+    @Override
+    public void broadcastUserList() {
+        StringBuilder builder = new StringBuilder(Commands.USER_LIST.toString());
+
+        for (ClientHandler client : clients) {
+            builder.append(client.getUser().getNick()).append(" ");
+        }
+
+        String message =builder.toString();
+
+        for (ClientHandler client : clients) {
+            client.sendMessage(message);
+        }
+    }
 }

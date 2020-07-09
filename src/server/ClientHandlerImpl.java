@@ -96,9 +96,10 @@ public class ClientHandlerImpl implements ClientHandler {
 
 
     private void authOK(UserData user) {
+        sendMessage(AUTH_OK.toString());
         server.subscribe(this);
+        server.broadcastMessage(USER_ONLINE.toString() + user.getNick());
         usersOnline.addUserOnline(user);
-        server.broadcastMessage(AUTH_OK.toString() + user.getNick());
     }
 
     @Override

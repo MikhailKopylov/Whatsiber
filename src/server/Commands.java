@@ -2,9 +2,9 @@ package server;
 
 public enum Commands {
 
-    EXIT("/end"),  CHECK_AUTH("/auth"), AUTH_OK("/authOK "), AUTH_WRONG("/authWrong"),
+    EXIT("/end"),  CHECK_AUTH("/auth"), AUTH_OK("/authOK"),USER_ONLINE("/userOnline "), AUTH_WRONG("/authWrong"),
     ONLINE_WRONG("/onlineWrong "), PRIVATE_MESSAGE("/privateMsg "),
-    REGISTRATION("/reg");
+    REGISTRATION("/reg"), USER_LIST("/userlist ");
 
 
 

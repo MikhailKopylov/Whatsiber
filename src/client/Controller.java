@@ -5,27 +5,23 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import server.Commands;
-import server.ServerImpl;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     @FXML
-    public HBox privateMessagePanel;
+    private HBox privateMessagePanel;
     @FXML
-    public TextField nickRecipientTextField;
+    private TextField nickRecipientTextField;
     @FXML
-    public Button sendPrivateMsg;
+    private CheckBox privateCheckBox;
     @FXML
-    public CheckBox privateCheckBox;
+    private ListView<String> usersList;
     @FXML
     private TextField newMsgTextField;
     @FXML
@@ -54,14 +50,12 @@ public class Controller implements Initializable {
             stage = (Stage) loginTextField.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
                 if (client.isRun()) {
-                        client.sendMessage(Commands.EXIT.toString());
+                    client.sendMessage(Commands.EXIT.toString());
                 }
             });
         });
 
     }
-
-
 
 
     public void sendMessage(ActionEvent actionEvent) {
@@ -77,13 +71,13 @@ public class Controller implements Initializable {
     public void Enter() {
         String login = loginTextField.getText();
         String pass = passTextField.getText();
-        if(!login.isEmpty() && !pass.isEmpty()) {
+        if (!login.isEmpty() && !pass.isEmpty()) {
             client.sendMessage(String.format("%s %s %s", Commands.CHECK_AUTH, login, pass));
             passTextField.clear();
         }
     }
 
-    public void setAuthorized(boolean authorized){
+    public void setAuthorized(boolean authorized) {
         authPanel.setVisible(!authorized);
         authPanel.setManaged(!authorized);
 
@@ -91,10 +85,11 @@ public class Controller implements Initializable {
         newMessagePanel.setManaged(authorized);
         privateCheckBox.setVisible(authorized);
         privateCheckBox.setManaged(authorized);
-        if(authorized){
-            Platform.runLater(() -> {
-                stage.setTitle(StartClient.TITLE + ": " + client.getNick());
-            });
+        usersList.setVisible(authorized);
+        usersList.setManaged(authorized);
+        if (authorized) {
+            Platform.runLater(() -> stage.setTitle(StartClient.TITLE + ": " + client.getNick()));
+            chatTextArea.clear();
         }
 
 
@@ -107,7 +102,7 @@ public class Controller implements Initializable {
     }
 
     public void sendPrivateMessage(ActionEvent actionEvent) {
-        if(privateCheckBox.isSelected() && !nickRecipientTextField.getText().isEmpty()) {
+        if (privateCheckBox.isSelected() && !nickRecipientTextField.getText().isEmpty()) {
             String nickNameMsgRecipient = nickRecipientTextField.getText();
             client.sendPrivateMessage(newMsgTextField.getText(), nickNameMsgRecipient);
             nickRecipientTextField.clear();
@@ -117,7 +112,7 @@ public class Controller implements Initializable {
     }
 
     public void selected() {
-        if(privateCheckBox.isSelected()){
+        if (privateCheckBox.isSelected()) {
             privateMessagePanel.setVisible(true);
             privateMessagePanel.setManaged(true);
             sendNewMsg.setDisable(true);
@@ -129,5 +124,22 @@ public class Controller implements Initializable {
             newMsgTextField.setOnAction(this::sendMessage);
 
         }
+    }
+
+    void updateUserList(String... users) {
+        Platform.runLater(() -> {
+            usersList.getItems().clear();
+            for (String user : users) {
+            usersList.getItems().add(user);
+            }
+        });
+    }
+
+    public void clickUserList() {
+        System.out.println(usersList.getSelectionModel().getSelectedItem());
+        privateCheckBox.setSelected(true);
+        selected();
+        nickRecipientTextField.setText(usersList.getSelectionModel().getSelectedItem());
+
     }
 }

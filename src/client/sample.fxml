@@ -11,6 +11,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ListView?>
 <BorderPane fx:controller="client.Controller"
             xmlns:fx="http://javafx.com/fxml">
 
@@ -28,22 +29,26 @@
         <VBox>
 
             <HBox fx:id="authPanel">
-                <TextField fx:id="loginTextField" promptText="Логин"
-                           HBox.hgrow="ALWAYS"/>
-                <PasswordField fx:id="passTextField" promptText="Пароль"
-                               HBox.hgrow="ALWAYS" onAction="#Enter"/>
+                <TextField fx:id="loginTextField" promptText="Логин" HBox.hgrow="ALWAYS"/>
+                <PasswordField fx:id="passTextField" promptText="Пароль" HBox.hgrow="ALWAYS" onAction="#Enter"/>
                 <Button text="Войти" onAction="#Enter"/>
             </HBox>
 
-            <TextArea fx:id="chatTextArea" editable="false" focusTraversable="false" VBox.vgrow="ALWAYS"/>
+
+            <HBox VBox.vgrow="ALWAYS">
+                <TextArea fx:id="chatTextArea" editable="false" focusTraversable="false" HBox.hgrow="ALWAYS"/>
+                <ListView fx:id="usersList" visible="false" managed="false" onMouseReleased="#clickUserList"/>
+            </HBox>
+
 
             <HBox fx:id="newMessagePanel" visible="false" managed="false">
-                <TextField fx:id="newMsgTextField" promptText="Введите сообщение"
-                           HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
+                <TextField fx:id="newMsgTextField" promptText="Введите сообщение" HBox.hgrow="ALWAYS" onAction="#sendMessage"/>
                 <Button fx:id="sendNewMsg" text="Отправить" onAction="#sendMessage"/>
             </HBox>
-            <CheckBox fx:id="privateCheckBox" text="Личное сообщение" onAction="#selected"
-                      visible="false" managed="false"/>
+
+
+            <CheckBox fx:id="privateCheckBox" text="Личное сообщение" onAction="#selected" visible="false" managed="false"/>
+
 
             <HBox fx:id="privateMessagePanel" visible="false" managed="false">
                 <TextField fx:id="nickRecipientTextField" promptText="Введите имя получателя сообщения"
