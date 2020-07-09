@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
 import static server.Commands.*;
 
@@ -36,10 +37,12 @@ public class ClientHandlerImpl implements ClientHandler {
         authentication = new AuthSimple();
 
         initializeStreams();
-        new Thread(() -> {
+        Thread waitMessage = new Thread(() -> {
             checkAuthenticating();
             readIncomingMessage();
-        }).start();
+        });
+        waitMessage.setDaemon(true);
+        waitMessage.start();
     }
 
 
@@ -67,18 +70,18 @@ public class ClientHandlerImpl implements ClientHandler {
         while (true) {
             try {
                 String authMsg = in.readUTF();
-                if (authMsg.startsWith(CHECK_AUTH)) {
+                if (authMsg.startsWith(CHECK_AUTH.toString())) {
                     user = authenticating(authMsg);
                     if (user != null) {
                         if (!usersOnline.isUserOnline(user)) {
                             authOK(user);
                             break;
                         } else {
-                            sendMessage(ONLINE_WRONG + user.getNick());
+                            sendMessage(ONLINE_WRONG.toString() + user.getNick());
                             System.out.println(ONLINE_WRONG);
                         }
                     } else {
-                        sendMessage(AUTH_WRONG);
+                        sendMessage(AUTH_WRONG.toString());
                         System.out.println(AUTH_WRONG);
                     }
                 }
@@ -95,7 +98,7 @@ public class ClientHandlerImpl implements ClientHandler {
     private void authOK(UserData user) {
         server.subscribe(this);
         usersOnline.addUserOnline(user);
-        server.broadcastMessage(AUTH_OK + user.getNick());
+        server.broadcastMessage(AUTH_OK.toString() + user.getNick());
     }
 
     @Override
@@ -103,16 +106,11 @@ public class ClientHandlerImpl implements ClientHandler {
         while (true) {
             try {
                 String incomingMsg = in.readUTF();
-                if (incomingMsg.startsWith(EXIT)) {
-                    break;
-                } else if (incomingMsg.startsWith(PRIVATE_MESSAGE)) {
-                    String[] token = incomingMsg.split("\\s+");
-                    String nickName = token[1];
-                    String message = token[2];
-                    if(authentication.isUserExists(nickName)) {
-                        server.sendMessagePrivate(message, this,nickName);
-                    } else{
-                        sendMessage(String.format("%s - такого пользователя не существует", nickName));
+                if (incomingMsg.startsWith("/")) {
+                    if (incomingMsg.startsWith(EXIT.toString())) {
+                        break;
+                    } else {
+                        parseCommandMessage(incomingMsg);
                     }
                 } else {
                     server.broadcastMessage(user.getNick() + ": " + incomingMsg);
@@ -124,9 +122,31 @@ public class ClientHandlerImpl implements ClientHandler {
         exit();
     }
 
+    private void parseCommandMessage(String incomingMsg) {
+        String[] token = incomingMsg.split("\\s+", 3);
+        String nickName = token[1];
+        String message = token[2];
+        Commands command = Commands.convertToCommand(token[0]);
+        switch (Objects.requireNonNull(command)) {
+            case PRIVATE_MESSAGE:
+                if (authentication.isUserExists(nickName)) {
+                    server.sendMessagePrivate(message, this, nickName);
+                } else {
+                    sendMessage(String.format("%s - такого пользователя не существует", nickName));
+                }
+                break;
+            case REGISTRATION:
+
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected command: " + token[0]);
+        }
+    }
+
     private void exit() {
         try {
-            sendMessage(EXIT);
+            sendMessage(EXIT.toString());
             server.unsubscribe(this);
             server.broadcastMessage(String.format("%s покинул чат", user.getNick()));
             usersOnline.removeUserOnline(user);

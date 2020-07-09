@@ -8,4 +8,5 @@ public interface Client {
     void sendPrivateMessage(String message, String nickRecipient);
 
     boolean isRun();
+    String getNick();
 }

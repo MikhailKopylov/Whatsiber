@@ -1,12 +1,31 @@
 package server;
 
-public final class Commands {
+public enum Commands {
 
-    public static final String EXIT = "/end";
-    public static final String CHECK_AUTH = "/auth";
-    public static final String AUTH_OK = "/authOK ";
-    public static final String AUTH_WRONG = "/authWrong";
-    public static final String ONLINE_WRONG = "/onlineWrong ";
-    public static final String PRIVATE_MESSAGE = "/privateMsg ";
+    EXIT("/end"),  CHECK_AUTH("/auth"), AUTH_OK("/authOK "), AUTH_WRONG("/authWrong"),
+    ONLINE_WRONG("/onlineWrong "), PRIVATE_MESSAGE("/privateMsg "),
+    REGISTRATION("/reg");
+
+
+
+    private final String command;
+
+    Commands(String command) {
+        this.command = command;
+    }
+
+    @Override
+    public String toString() {
+        return  command;
+    }
+
+    static public Commands convertToCommand(String command){
+        for (int i = 0; i < Commands.values().length; i++) {
+            if(command.equals(Commands.values()[i].toString().trim())){
+                return Commands.values()[i];
+            }
+        }
+        return null;
+    }
 
 }

@@ -44,18 +44,19 @@ public class ServerImpl implements Server {
     public void broadcastMessage(String message) {
         for (ClientHandler client : clients) {
             client.sendMessage(message);
-            System.out.println("To all");
         }
     }
 
     @Override
-    public void sendMessagePrivate(String message, ClientHandler from, String nickRecipient) {
-        ClientHandler clientRecipient = findClientHandler(nickRecipient);
-        if (clientRecipient != null && (usersOnline.isUserOnline(clientRecipient.getUser()))) {
-                from.sendMessage(String.format("личное сообщение для %s : %s", nickRecipient, message));
-                clientRecipient.sendMessage(String.format("личное сообщение от %s : %s", from.getUser().getNick(), message));
+    public void sendMessagePrivate(String message, ClientHandler senderClinet, String nickRecipient) {
+        ClientHandler recipientClient = findClientHandler(nickRecipient);
+        if (recipientClient != null && (usersOnline.isUserOnline(recipientClient.getUser()))) {
+                senderClinet.sendMessage(String.format("личное сообщение для %s : %s", nickRecipient, message));
+            if (!senderClinet.equals(recipientClient)) {
+                recipientClient.sendMessage(String.format("личное сообщение от %s : %s", senderClinet.getUser().getNick(), message));
+            }
         } else {
-                from.sendMessage(String.format("%s не в сети", nickRecipient));
+                senderClinet.sendMessage(String.format("%s не в сети", nickRecipient));
         }
     }
 
@@ -75,8 +76,8 @@ public class ServerImpl implements Server {
 
     @Override
     public void unsubscribe(ClientHandler clientHandler) {
-
         clients.remove(clientHandler);
+        System.out.println(String.format("%s отключился", clientHandler.getUser().getNick()));
     }
 
 }

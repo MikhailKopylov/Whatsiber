@@ -8,10 +8,12 @@ import javafx.stage.Stage;
 
 public class StartClient extends Application {
 
+    public static final String TITLE = "Whatsiber";
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Whatsgramm");
+        primaryStage.setTitle(TITLE);
         primaryStage.setScene(new Scene(root, 640, 480));
         primaryStage.show();
     }

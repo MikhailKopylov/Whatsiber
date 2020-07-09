@@ -12,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import server.Commands;
+import server.ServerImpl;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -53,7 +54,7 @@ public class Controller implements Initializable {
             stage = (Stage) loginTextField.getScene().getWindow();
             stage.setOnCloseRequest(event -> {
                 if (client.isRun()) {
-                        client.sendMessage(Commands.EXIT);
+                        client.sendMessage(Commands.EXIT.toString());
                 }
             });
         });
@@ -90,12 +91,17 @@ public class Controller implements Initializable {
         newMessagePanel.setManaged(authorized);
         privateCheckBox.setVisible(authorized);
         privateCheckBox.setManaged(authorized);
+        if(authorized){
+            Platform.runLater(() -> {
+                stage.setTitle(StartClient.TITLE + ": " + client.getNick());
+            });
+        }
 
 
     }
 
     public void logout() {
-        client.sendMessage(Commands.EXIT);
+        client.sendMessage(Commands.EXIT.toString());
         stage.close();
 
     }
