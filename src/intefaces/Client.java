@@ -1,5 +1,8 @@
 package intefaces;
 
+import users.Password;
+import users.UserData;
+
 public interface Client {
 
 
@@ -9,4 +12,5 @@ public interface Client {
 
     boolean isRun();
     String getNick();
+    void tryToReg(UserData user, Password password);
 }

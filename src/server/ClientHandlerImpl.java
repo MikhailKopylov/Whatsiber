@@ -16,6 +16,8 @@ import static server.Commands.*;
 
 public class ClientHandlerImpl implements ClientHandler {
 
+    public static final String REGEX_SPLIT = "\\s+";
+
     private final Server server;
     private final Socket socket;
     private DataOutputStream out;
@@ -38,8 +40,11 @@ public class ClientHandlerImpl implements ClientHandler {
 
         initializeStreams();
         Thread waitMessage = new Thread(() -> {
-            checkAuthenticating();
-            readIncomingMessage();
+            if (checkAuthenticating()) {
+                readIncomingMessage();
+            } else {
+                exitNotReg();
+            }
         });
         waitMessage.setDaemon(true);
         waitMessage.start();
@@ -59,23 +64,36 @@ public class ClientHandlerImpl implements ClientHandler {
     public void sendMessage(String message) {
         try {
             out.writeUTF(message);
-            System.out.println("Send msg run");
+            System.out.println("Reg OK");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void checkAuthenticating() {
+    public boolean checkAuthenticating() {
         while (true) {
             try {
                 String authMsg = in.readUTF();
+                if (authMsg.startsWith(EXIT.toString())) {
+                    return false;
+                }
+                if(authMsg.startsWith(TRY_REG.toString())){
+                    String[] token = authMsg.split(REGEX_SPLIT);
+                    if (token.length >= 4) {
+                        if(authentication.registration(new Login(token[1]), new Password(token[2]), new NickName(token[3]))){
+                            sendMessage(REG_OK.toString());
+                        } else {
+                            sendMessage(REG_WRONG.toString());
+                        }
+                    }
+                }
                 if (authMsg.startsWith(CHECK_AUTH.toString())) {
                     user = authenticating(authMsg);
                     if (user != null) {
                         if (!usersOnline.isUserOnline(user)) {
                             authOK(user);
-                            break;
+                            return true;
                         } else {
                             sendMessage(ONLINE_WRONG.toString() + user.getNick());
                             System.out.println(ONLINE_WRONG);
@@ -90,13 +108,11 @@ public class ClientHandlerImpl implements ClientHandler {
                 e.printStackTrace();
             }
         }
-
-
     }
 
 
     private void authOK(UserData user) {
-        sendMessage(AUTH_OK.toString());
+        sendMessage(AUTH_OK.toString() + user.getNick());
         server.subscribe(this);
         server.broadcastMessage(USER_ONLINE.toString() + user.getNick());
         usersOnline.addUserOnline(user);
@@ -124,7 +140,7 @@ public class ClientHandlerImpl implements ClientHandler {
     }
 
     private void parseCommandMessage(String incomingMsg) {
-        String[] token = incomingMsg.split("\\s+", 3);
+        String[] token = incomingMsg.split(REGEX_SPLIT, 3);
         String nickName = token[1];
         String message = token[2];
         Commands command = Commands.convertToCommand(token[0]);
@@ -136,7 +152,7 @@ public class ClientHandlerImpl implements ClientHandler {
                     sendMessage(String.format("%s - такого пользователя не существует", nickName));
                 }
                 break;
-            case REGISTRATION:
+            case TRY_REG:
 
                 break;
 
@@ -163,9 +179,24 @@ public class ClientHandlerImpl implements ClientHandler {
         }
     }
 
+    private void exitNotReg() {
+        try {
+            sendMessage(EXIT.toString());
+        } finally {
+            try {
+                socket.close();
+                in.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     private UserData authenticating(String incomingMsg) {
 
-        String[] token = incomingMsg.split("\\s");
+        String[] token = incomingMsg.split(REGEX_SPLIT);
         Login login = new Login(token[1]);
         Password pass = new Password(token[2]);
         return getAuthentication().getUserAuth(login, pass);

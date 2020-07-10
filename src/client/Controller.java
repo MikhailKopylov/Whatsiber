@@ -4,12 +4,17 @@ import intefaces.Client;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import server.Commands;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -38,6 +43,8 @@ public class Controller implements Initializable {
     private TextField loginTextField;
 
     private Stage stage;
+    private Stage regStage;
+    private RegController regController;
 
     private Client client;
 
@@ -54,6 +61,28 @@ public class Controller implements Initializable {
                 }
             });
         });
+
+        regStage = createRegWindow();
+
+    }
+
+    private Stage createRegWindow() {
+        Stage stage = new Stage();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("reg.fxml"));
+            Parent root = loader.load();
+
+            stage.setTitle("Окно рестрации");
+            stage.setScene(new Scene(root, 350, 250));
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            regController = loader.getController();
+            regController.setClient(client);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stage;
 
     }
 
@@ -130,7 +159,7 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             usersList.getItems().clear();
             for (String user : users) {
-            usersList.getItems().add(user);
+                usersList.getItems().add(user);
             }
         });
     }
@@ -141,5 +170,14 @@ public class Controller implements Initializable {
         selected();
         nickRecipientTextField.setText(usersList.getSelectionModel().getSelectedItem());
 
+    }
+
+    public RegController getRegController() {
+        return regController;
+    }
+
+    public void reg() {
+        regController.clearFields();
+        regStage.show();
     }
 }

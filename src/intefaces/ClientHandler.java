@@ -4,7 +4,7 @@ import users.UserData;
 
 public interface ClientHandler {
 
-    void checkAuthenticating();
+    boolean checkAuthenticating();
     void sendMessage(String message);
     void readIncomingMessage();
     UserData getUser();

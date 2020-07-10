@@ -32,6 +32,7 @@
                 <TextField fx:id="loginTextField" promptText="Логин" HBox.hgrow="ALWAYS"/>
                 <PasswordField fx:id="passTextField" promptText="Пароль" HBox.hgrow="ALWAYS" onAction="#Enter"/>
                 <Button text="Войти" onAction="#Enter"/>
+                <Button text="Reg" onAction="#reg"/>
             </HBox>
 
 
@@ -53,7 +54,7 @@
             <HBox fx:id="privateMessagePanel" visible="false" managed="false">
                 <TextField fx:id="nickRecipientTextField" promptText="Введите имя получателя сообщения"
                            HBox.hgrow="ALWAYS" onAction="#sendPrivateMessage"/>
-                <Button fx:id="sendPrivateMsg" text="Отправить" onAction="#sendPrivateMessage"/>
+                <Button  text="Отправить личное сообщение" onAction="#sendPrivateMessage"/>
             </HBox>
 
         </VBox>

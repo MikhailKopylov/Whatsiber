@@ -1,9 +1,12 @@
 package client;
 
 import intefaces.Client;
+import users.Password;
+import users.UserData;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -13,6 +16,7 @@ public class ClientImpl implements Client {
 
     private static final int PORT = 8189;
     private static final String IP_ADDRESS = "localhost";
+    public static final String REGEX_SPLIT = "\\s+";
 
     private final Controller controller;
 
@@ -63,17 +67,26 @@ public class ClientImpl implements Client {
         Thread waitMessage = new Thread(() -> {
             try {
                 while (true) {
-                    String commandMsg = in.readUTF();
+                    String commandMsg;
+                    try {
+                        commandMsg = in.readUTF();
+                    } catch (EOFException e) {
+                        return;
+                    }
 
                     if (commandMsg.startsWith(AUTH_OK.toString())) {
-//                        nick = commandMsg.split("\\s")[1];
-//                        controller.addNewMessage(String.format("%s в сети", nick));
+                        nick = commandMsg.split(REGEX_SPLIT)[1];
+                        controller.addNewMessage(String.format("%s в сети", nick));
                         controller.setAuthorized(true);
                         break;
                     } else if (commandMsg.startsWith(AUTH_WRONG.toString())) {
                         controller.addNewMessage("Неверное имя пользователя или пароль");
+                    } else if (commandMsg.startsWith(REG_OK.toString())) {
+                        controller.getRegController().addMessage("Регистрация прошла успешно");
+                    } else if (commandMsg.startsWith(REG_WRONG.toString())) {
+                        controller.getRegController().addMessage("Имя пользователя или ник уже заняты. Попробуйте еще раз");
                     } else if (commandMsg.startsWith(ONLINE_WRONG.toString())) {
-                        String nickOnlineWrong = commandMsg.split("\\s")[1];
+                        String nickOnlineWrong = commandMsg.split(REGEX_SPLIT)[1];
                         controller.addNewMessage(String.format("%s уже в сети", nickOnlineWrong));
                     }
 
@@ -83,13 +96,13 @@ public class ClientImpl implements Client {
 
                     if (incomingMsg.startsWith("/")) {
                         if (incomingMsg.startsWith(USER_ONLINE.toString())) {
-                            String newUserNick = incomingMsg.split("\\s")[1];
+                            String newUserNick = incomingMsg.split(REGEX_SPLIT)[1];
                             controller.addNewMessage(String.format("%s в сети", newUserNick));
                         } else if (incomingMsg.startsWith(EXIT.toString())) {
                             break;
                         } else if (incomingMsg.startsWith(USER_LIST.toString())) {
-                            String[] token = incomingMsg.split("\\s+", 2);
-                            String[] users = token[1].split("\\s+");
+                            String[] token = incomingMsg.split(REGEX_SPLIT, 2);
+                            String[] users = token[1].split(REGEX_SPLIT);
                             controller.updateUserList(users);
                         }
                     } else {
@@ -117,4 +130,19 @@ public class ClientImpl implements Client {
             return "";
         }
     }
+
+    @Override
+    public void tryToReg(UserData user, Password password) {
+        if (socket != null && socket.isClosed()) {
+            connected();
+        }
+
+        try {
+            out.writeUTF(String.format("%s %s %s %s",
+                    TRY_REG.toString(), user.getLogin(), password.toString(), user.getNick()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -26,4 +26,9 @@ public class Password {
     public int hashCode() {
         return Objects.hash(getPassword());
     }
+
+    @Override
+    public String toString() {
+        return password;
+    }
 }
