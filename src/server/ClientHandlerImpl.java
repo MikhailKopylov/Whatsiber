@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Objects;
 
 import static server.Commands.*;
@@ -17,6 +18,7 @@ import static server.Commands.*;
 public class ClientHandlerImpl implements ClientHandler {
 
     public static final String REGEX_SPLIT = "\\s+";
+    public static final int TIMEOUT = 120_000;
 
     private final Server server;
     private final Socket socket;
@@ -75,13 +77,14 @@ public class ClientHandlerImpl implements ClientHandler {
         while (true) {
             try {
                 String authMsg = in.readUTF();
+                socket.setSoTimeout(TIMEOUT);
                 if (authMsg.startsWith(EXIT.toString())) {
                     return false;
                 }
-                if(authMsg.startsWith(TRY_REG.toString())){
+                if (authMsg.startsWith(TRY_REG.toString())) {
                     String[] token = authMsg.split(REGEX_SPLIT);
                     if (token.length >= 4) {
-                        if(authentication.registration(new Login(token[1]), new Password(token[2]), new NickName(token[3]))){
+                        if (authentication.registration(new Login(token[1]), new Password(token[2]), new NickName(token[3]))) {
                             sendMessage(REG_OK.toString());
                         } else {
                             sendMessage(REG_WRONG.toString());
@@ -104,6 +107,8 @@ public class ClientHandlerImpl implements ClientHandler {
                     }
                 }
 
+            } catch (SocketTimeoutException e) {
+                sendMessage(EXIT.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -74,6 +74,11 @@ public class ClientImpl implements Client {
                         return;
                     }
 
+                    if(commandMsg.startsWith(EXIT.toString())){
+                        controller.logout();
+//                        return;
+                    }
+
                     if (commandMsg.startsWith(AUTH_OK.toString())) {
                         nick = commandMsg.split(REGEX_SPLIT)[1];
                         controller.addNewMessage(String.format("%s в сети", nick));

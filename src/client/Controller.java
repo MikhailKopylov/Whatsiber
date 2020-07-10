@@ -126,7 +126,8 @@ public class Controller implements Initializable {
 
     public void logout() {
         client.sendMessage(Commands.EXIT.toString());
-        stage.close();
+        Platform.runLater(() -> stage.close());
+
 
     }
 
@@ -179,5 +180,9 @@ public class Controller implements Initializable {
     public void reg() {
         regController.clearFields();
         regStage.show();
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }
